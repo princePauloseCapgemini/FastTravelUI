@@ -1,10 +1,10 @@
-import "./App.css";
+import { Box, Text } from "@chakra-ui/react";
 
 function App() {
   return (
-    <div>
-      <h2>Fast Travel</h2>
-    </div>
+    <Box>
+      <Text>Fast Travel</Text>
+    </Box>
   );
 }
 
