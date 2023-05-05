@@ -11,8 +11,16 @@ interface LayoutProps {
 export const Layout: FC<LayoutProps> = ({ rightElement, title, children }) => {
   return (
     <Box>
-      <Flex bgColor="black" p="4" dir="row" justifyContent="space-between">
-        <Heading size="md" color="white">{title}</Heading>
+      <Flex
+        bgColor="black"
+        py="6"
+        px="8"
+        dir="row"
+        justifyContent="space-between"
+      >
+        <Heading size="md" color="white">
+          {title}
+        </Heading>
         {rightElement ? rightElement : null}
       </Flex>
       {children}
