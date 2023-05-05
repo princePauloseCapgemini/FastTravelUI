@@ -1,9 +1,14 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
+import { BrowserRouter } from "react-router-dom";
+
+import Router from "./routes";
 
 function App() {
   return (
     <Box>
-      <Text>Fast Travel</Text>
+      <BrowserRouter>
+        <Router />
+      </BrowserRouter>
     </Box>
   );
 }
