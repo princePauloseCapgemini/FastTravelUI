@@ -13,4 +13,6 @@ function App() {
   );
 }
 
+console.log('Default react app');
+
 export default App;
