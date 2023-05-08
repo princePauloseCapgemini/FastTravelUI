@@ -71,7 +71,7 @@ function BookTrip() {
   }
 
   return (
-    <Box w="100%" minH="100%" bgColor="grey" px="8" py="4">
+    <Box w="100%" minH="100%" px="8" py="4">
       <SimpleGrid columns={isMobile ? 1 : 2}>
         <Box
           p={4}
@@ -121,6 +121,7 @@ function BookTrip() {
           shadow="base"
           zIndex="1"
           overflow="hidden"
+          minH="300px"
         >
           <GoogleMap
             center={center}
