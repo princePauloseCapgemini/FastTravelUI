@@ -1,4 +1,4 @@
-import { Box, Container, Flex, Text } from "@chakra-ui/react";
+import { Box, Container, Text } from "@chakra-ui/react";
 import LoginForm from "./LoginForm";
 
 export default function Login() {
@@ -25,7 +25,7 @@ export default function Login() {
         borderBottomLeftRadius="xl"
       >
         <Text fontSize="lg" fontWeight="500" mb="6" color="grey">
-          Login with Mobile Number
+          Login with Email Address
         </Text>
         <LoginForm />
       </Box>
