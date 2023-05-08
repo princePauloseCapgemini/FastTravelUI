@@ -12,7 +12,11 @@ interface RouteProps {
 
 function Router() {
   const UnRestrictedRoute = ({ element }: RouteProps) => {
-    return <Layout title="Fast Travel">{element}</Layout>;
+    return (
+      <Layout title="Fast Travel" bgImage="/cab.jpg">
+        {element}
+      </Layout>
+    );
   };
 
   return (
