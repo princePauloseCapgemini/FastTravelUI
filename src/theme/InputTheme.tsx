@@ -6,28 +6,23 @@ const { definePartsStyle, defineMultiStyleConfig } =
 
 const customInput = definePartsStyle({
   field: {
-    border: "1px solid",
-    borderColor: "gray.200",
-    background: "gray.50",
+    border: "none",
+    background: "#eee",
     borderRadius: "md",
 
-    _dark: {
-      borderColor: "gray.600",
-      background: "gray.800",
-    },
-
     _focus: {
+      border: "1px solid",
       borderColor: "black",
     },
   },
   addon: {
-    border: "1px solid",
-    borderColor: "gray.200",
-    background: "gray.200",
-    borderRadius: "md",
     color: "gray.500",
+    border: "none",
+    background: "#eee",
+    borderRadius: "md",
 
     _focus: {
+      border: "1px solid",
       borderColor: "black",
     },
   },
