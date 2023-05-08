@@ -7,7 +7,7 @@ export default function Login() {
       maxW="container.sm"
       p="8"
       justifyContent="center"
-      h="calc(100vh - 72px)"
+      h="100%"
       display="flex"
       alignItems="center"
     >

@@ -24,19 +24,15 @@ export const Layout: FC<LayoutProps> = ({
       width="100vw"
       height="100vh"
     >
-      <Flex
-        bgColor="white"
-        py="6"
-        px="8"
-        dir="row"
-        justifyContent="space-between"
-      >
+      <Flex bgColor="white" py="6" px="8" dir="row" alignItems="center">
         <Heading size="md" color="grey">
           {title}
         </Heading>
         {rightElement ? rightElement : null}
       </Flex>
-      {children}
+      <Box h={`calc(100vh - ${rightElement ? "88px" : "72px"})`}>
+        {children}
+      </Box>
     </Box>
   );
 };
