@@ -17,7 +17,7 @@ import * as Yup from "yup";
 import { Link } from "react-router-dom";
 
 const LoginSchema = Yup.object().shape({
-  phone: Yup.number().required("Required"),
+  emailAddress: Yup.string().required("Required"),
   password: Yup.string().required("Required"),
 });
 
@@ -26,7 +26,7 @@ function LoginForm() {
   const toast = useToast();
 
   const onRegister = useCallback(
-    async (payload: { phone: string; password: string }) => {
+    async (payload: { emailAddress: string; password: string }) => {
       console.log(payload);
       //   await login({ variables: { loginInput: payload } })
       //     .then(() => {
@@ -52,7 +52,7 @@ function LoginForm() {
   return (
     <Formik
       initialValues={{
-        phone: "",
+        emailAddress: "",
         password: "",
       }}
       validationSchema={LoginSchema}
@@ -70,19 +70,23 @@ function LoginForm() {
       {({ isSubmitting }) => (
         <Form>
           <VStack alignItems="flex-start" spacing="4">
-            <Field name="phone">
+            <Field name="emailAddress">
               {({ field, form }: any) => (
                 <FormControl
-                  isInvalid={form.errors.phone && form.touched.phone}
+                  isInvalid={
+                    form.errors.emailAddress && form.touched.emailAddress
+                  }
                 >
                   <Input
                     variant="customInput"
-                    data-testid="phone-input"
+                    data-testid="emailAddress-input"
                     {...field}
-                    placeholder="Number"
-                    type="number"
+                    placeholder="Email Address"
+                    type="email"
                   />
-                  <FormErrorMessage>{form.errors.phone}</FormErrorMessage>
+                  <FormErrorMessage>
+                    {form.errors.emailAddress}
+                  </FormErrorMessage>
                 </FormControl>
               )}
             </Field>
