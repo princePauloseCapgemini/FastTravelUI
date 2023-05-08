@@ -11,7 +11,7 @@ export default function Login() {
         py="2"
         data-testid="reg-form-wrapper"
       >
-        <Text fontSize="lg" fontWeight="500" mb="4" color="grey">
+        <Text fontSize="lg" fontWeight="500" mb="6" color="grey">
           Login with Mobile Number
         </Text>
         <LoginForm />

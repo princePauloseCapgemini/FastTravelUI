@@ -9,6 +9,7 @@ const customInput = definePartsStyle({
     border: "none",
     background: "#eee",
     borderRadius: "md",
+    height: "50px",
 
     _focus: {
       border: "1px solid",

@@ -79,7 +79,7 @@ function LoginForm() {
                     variant="customInput"
                     data-testid="phone-input"
                     {...field}
-                    placeholder="Phone number"
+                    placeholder="Number"
                     type="number"
                   />
                   <FormErrorMessage>{form.errors.phone}</FormErrorMessage>
@@ -93,6 +93,7 @@ function LoginForm() {
                   isInvalid={form.errors.password && form.touched.password}
                 >
                   <Input
+                    mb="2"
                     variant="customInput"
                     data-testid="password-input"
                     {...field}
