@@ -7,6 +7,7 @@ export default function Signup() {
       maxW="container.sm"
       p="8"
       justifyContent="center"
+      h="100%"
       display="flex"
       alignItems="center"
     >
