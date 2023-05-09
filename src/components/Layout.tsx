@@ -23,6 +23,9 @@ export const Layout: FC<LayoutProps> = ({
       backgroundRepeat="no-repeat"
       width="100vw"
       height="100vh"
+      position="absolute"
+      overflowX="auto"
+      bgColor="grey"
     >
       <Flex bgColor="white" py="6" px="8" dir="row" alignItems="center">
         <Heading size="md" color="grey">
@@ -30,7 +33,7 @@ export const Layout: FC<LayoutProps> = ({
         </Heading>
         {rightElement ? rightElement : null}
       </Flex>
-      <Box h={`calc(100vh - ${rightElement ? "88px" : "72px"})`}>
+      <Box >
         {children}
       </Box>
     </Box>
