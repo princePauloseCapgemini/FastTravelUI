@@ -11,8 +11,8 @@ import { useForm } from 'react-hook-form'
 import { address } from './address';
 export default function SignupForm() {
     const [state, setState] = useState<string>('');
-    const [city, setCity] = useState<string[]>([]);
-    const [district, setDistrict] = useState<string[]>([]);
+    const [city, setCity] = useState<any[]>([]);
+    const [district, setDistrict] = useState<any[]>([]);
     const {
         handleSubmit,
         watch,
@@ -39,8 +39,8 @@ export default function SignupForm() {
     })
     const fieldOneValue = watch('type'); // Get the current value of fieldOne
     const states = address.states;
-    let cities: string[]  = [];
-    const districts : string[]  = [];
+    let cities: any[]  = [];
+    let districts : any[]  = [];
     function registerNewUser(payload: any): void {
         console.log(payload)
 
