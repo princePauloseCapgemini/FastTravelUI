@@ -30,8 +30,8 @@ function BookTrip() {
 
   const [map, setMap] = useState<any>(null);
   const [directionsResponse, setDirectionsResponse] = useState<any>(null);
-  const [distance, setDistance] = useState("");
-  const [duration, setDuration] = useState("");
+  const [distance, setDistance] = useState(143);
+  const [duration, setDuration] = useState(163);
 
   const originRef = useRef<HTMLInputElement>(null);
   const destiantionRef = useRef<HTMLInputElement>(null);
@@ -54,20 +54,37 @@ function BookTrip() {
       travelMode: google.maps.TravelMode.DRIVING,
     });
     setDirectionsResponse(results || null);
-    setDistance(results?.routes?.[0]?.legs?.[0]?.distance?.text || "");
-    setDuration(results?.routes?.[0]?.legs?.[0]?.duration?.text || "");
+    setDistance(results?.routes?.[0]?.legs?.[0]?.distance?.value || 0);
+    setDuration(results?.routes?.[0]?.legs?.[0]?.duration?.value || 0);
   }
 
   function clearRoute() {
     setDirectionsResponse(null);
-    setDistance("");
-    setDuration("");
+    setDistance(0);
+    setDuration(0);
     if (originRef?.current) {
       originRef.current.value = "";
     }
     if (destiantionRef?.current) {
       destiantionRef.current.value = "";
     }
+  }
+
+  async function bookMeeting() {
+    let endTime = new Date();
+    endTime.setMinutes(endTime.getMinutes() + duration);
+    endTime = new Date(endTime);
+
+    const payload = {
+      origin: originRef?.current?.value,
+      destination: destiantionRef?.current?.value,
+      fare: distance * 10 + duration * 2,
+      status: "IN_PROGRESS",
+      startTime: new Date(),
+      scheduledEndTime: endTime,
+    };
+
+    console.log(payload);
   }
 
   return (
@@ -88,30 +105,48 @@ function BookTrip() {
             justifyContent="space-between"
           >
             <Box flexGrow={1} w="100%">
-              <Autocomplete>
-                <Input type="text" placeholder="Origin" ref={originRef} />
-              </Autocomplete>
+              {/* <Autocomplete> */}
+              <Input
+                type="text"
+                placeholder="Origin"
+                ref={originRef}
+                defaultValue="Bengaluru"
+              />
+              {/* </Autocomplete> */}
             </Box>
             <Box flexGrow={1} w="100%">
-              <Autocomplete>
-                <Input
-                  type="text"
-                  placeholder="Destination"
-                  ref={destiantionRef}
-                />
-              </Autocomplete>
+              {/* <Autocomplete> */}
+              <Input
+                type="text"
+                placeholder="Destination"
+                ref={destiantionRef}
+                defaultValue="Mysuru"
+              />
+              {/* </Autocomplete> */}
             </Box>
 
             <HStack justifyContent="space-between" w="100%">
-              <Button colorScheme="pink" type="submit" onClick={calculateRoute}>
+              <Button
+                colorScheme="teal"
+                type="submit"
+                //  onClick={calculateRoute}
+              >
                 Calculate Route
               </Button>
-              <Button onClick={clearRoute}>Clear</Button>
+              <Button
+              // onClick={clearRoute}
+              >
+                Clear
+              </Button>
             </HStack>
           </VStack>
           <VStack w="100%" alignItems="flex-start" spacing={4} mt={4}>
-            {distance && <Text>Distance: {distance} </Text>}
-            {duration && <Text>Duration: {duration} </Text>}
+            {distance && <Text>Distance: {distance} Km </Text>}
+            {duration && <Text>Duration: {duration} mins </Text>}
+            <Text>Fare: ₹{distance * 10 + duration * 2} </Text>
+            <Button onClick={bookMeeting} colorScheme="teal">
+              Book Meeting
+            </Button>
           </VStack>
         </Box>
         <Box

@@ -1,6 +1,11 @@
 import React from "react";
 
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  HttpLink,
+} from "@apollo/client";
 import { ChakraProvider } from "@chakra-ui/react";
 import ReactDOM from "react-dom/client";
 
@@ -9,7 +14,12 @@ import "./index.css";
 import theme from "./theme";
 
 const client = new ApolloClient({
-  uri: "",
+  link: new HttpLink({
+    uri: "http://localhost:5000/graphql",
+    fetchOptions: {
+      mode: "no-cors",
+    },
+  }),
   cache: new InMemoryCache(),
 });
 

@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { gql, useMutation } from "@apollo/client";
 import {
   Button,
   Input,
@@ -10,7 +11,6 @@ import {
   HStack,
   Text,
 } from "@chakra-ui/react";
-// import { useMutation } from "@apollo/client";
 import { Formik, Form, Field } from "formik";
 
 import * as Yup from "yup";
@@ -21,30 +21,39 @@ const LoginSchema = Yup.object().shape({
   password: Yup.string().required("Required"),
 });
 
+const LOGIN_USER = gql`
+  mutation signInUser($userData: userData) {
+    signInUser(userData: $userData) {
+      createdAt
+      firstName
+    }
+  }
+`;
+
 function LoginForm() {
-  //   const [login] = useMutation("");
+  const [login] = useMutation(LOGIN_USER);
   const toast = useToast();
 
   const onRegister = useCallback(
     async (payload: { emailAddress: string; password: string }) => {
       console.log(payload);
-      //   await login({ variables: { loginInput: payload } })
-      //     .then(() => {
-      //       toast({
-      //         title: "Logged in successfully.",
-      //         status: "success",
-      //         duration: 5000,
-      //         isClosable: true,
-      //       });
-      //     })
-      //     .catch((error) => {
-      //       toast({
-      //         title: error.message || "Something went wrong.",
-      //         status: "error",
-      //         duration: 5000,
-      //         isClosable: true,
-      //       });
-      //     });
+      await login({ variables: { userData: payload } })
+        .then(() => {
+          toast({
+            title: "Logged in successfully.",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: error.message || "Something went wrong.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        });
     },
     [toast]
   );
