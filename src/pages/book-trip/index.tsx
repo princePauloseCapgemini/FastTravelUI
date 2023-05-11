@@ -7,8 +7,9 @@ import {
   SimpleGrid,
   Text,
   HStack,
+  useToast,
 } from "@chakra-ui/react";
-
+import { useMutation } from "@apollo/client";
 import {
   useJsApiLoader,
   GoogleMap,
@@ -17,11 +18,14 @@ import {
   DirectionsRenderer,
 } from "@react-google-maps/api";
 import { useRef, useState } from "react";
+import { BOOK_TRIP } from "../../graphqlOperation/mutation";
 import { useIsMobile } from "../../utilities/isMobile";
 
 const center = { lat: 48.8584, lng: 2.2945 };
 
 function BookTrip() {
+  const [bookTrip] = useMutation(BOOK_TRIP);
+  const toast = useToast();
   const { isMobile } = useIsMobile();
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBoVQ3bKj_EczoAexCIEwqc85dNdvKKuX8",
@@ -79,12 +83,28 @@ function BookTrip() {
       origin: originRef?.current?.value,
       destination: destiantionRef?.current?.value,
       fare: distance * 10 + duration * 2,
-      status: "IN_PROGRESS",
-      startTime: new Date(),
-      scheduledEndTime: endTime,
+      riderId: "rid_2345",
+      // status:"IN_PROGRESS",
+      // startTime: new Date(),
+      // scheduledEndTime: endTime,
     };
-
-    console.log(payload);
+    await bookTrip({ variables: { bookingData: payload } })
+      .then(() => {
+        toast({
+          title: "Trip Booked Successfully.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error.message || "Something went wrong.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      });
   }
 
   return (
