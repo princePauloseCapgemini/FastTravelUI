@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { useMutation } from "@apollo/client";
 import {
   Button,
   Input,
@@ -10,11 +11,12 @@ import {
   HStack,
   Text,
 } from "@chakra-ui/react";
-// import { useMutation } from "@apollo/client";
+import Cookies from "js-cookie";
 import { Formik, Form, Field } from "formik";
-
 import * as Yup from "yup";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import { LOGIN_USER } from "../../graphqlOperation/mutation";
 
 const LoginSchema = Yup.object().shape({
   emailAddress: Yup.string().required("Required"),
@@ -22,29 +24,31 @@ const LoginSchema = Yup.object().shape({
 });
 
 function LoginForm() {
-  //   const [login] = useMutation("");
+  const [login] = useMutation(LOGIN_USER);
   const toast = useToast();
+  const navigate = useNavigate();
 
   const onRegister = useCallback(
     async (payload: { emailAddress: string; password: string }) => {
-      console.log(payload);
-      //   await login({ variables: { loginInput: payload } })
-      //     .then(() => {
-      //       toast({
-      //         title: "Logged in successfully.",
-      //         status: "success",
-      //         duration: 5000,
-      //         isClosable: true,
-      //       });
-      //     })
-      //     .catch((error) => {
-      //       toast({
-      //         title: error.message || "Something went wrong.",
-      //         status: "error",
-      //         duration: 5000,
-      //         isClosable: true,
-      //       });
-      //     });
+      await login({ variables: { userData: payload } })
+        .then((response) => {
+          Cookies.set("jwt", JSON.stringify(response.data.signInUser));
+          navigate("/book-a-trip");
+          toast({
+            title: "Logged in successfully.",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: error.message || "Something went wrong.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        });
     },
     [toast]
   );

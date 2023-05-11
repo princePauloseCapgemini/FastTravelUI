@@ -5,7 +5,7 @@ export default function EntryProvider() {
   const jwt = Cookies.get("jwt");
 
   if (jwt) {
-    return <Navigate to="/dashboard" replace={true} />;
+    return <Navigate to="/book-a-trip" replace={true} />;
   }
 
   return <Navigate to="/login" replace={true} />;
