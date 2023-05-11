@@ -30,7 +30,7 @@ export default function SignupForm() {
             password: "",
             mobileNumber: "",
             userType: "RIDER",
-            age: "",
+            dob: "",
             drivingLicenseNumber: "",
             vehicleRegistrationNumber: "",
             state: "",
@@ -70,6 +70,18 @@ export default function SignupForm() {
         cities = stateObj ? stateObj.cities : [];
         setCity(cities);
     };
+
+      // Function to handle city change
+      const handleCityChange = (event: any) => {
+        // Find the state object with the given name
+        const stateObj = address.states.find(states => states.name === state);
+        // Find the city object with the given name within the state object
+        const cityObject = stateObj ? stateObj.cities.find(city => city.name === event.target.value) : null;
+        // Extract the districts from the city object
+        districts = cityObject ? cityObject.districts : [];
+        setDistrict(districts)
+    };
+
 
     return (
         <Container maxW="container.lg" p="8" justifyContent="center">
@@ -226,12 +238,15 @@ export default function SignupForm() {
                         <Input
                         variant="customInput"
                             id='age'
-                            placeholder='Age'
+                            placeholder='Date of Birth'
                             disabled={fieldOneValue !== 'PARTNER'}
                             // Disable if fieldOne is not 'option1'
-                            {...register('age', {
-                                required: 'Please Input age',
-                                minLength: { value: 2, message: 'Minimum length should be 2' },
+                            {...register('dob', {
+                                required: true,
+                                pattern: {
+                                  value: /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2[0-9]|3[01])\/(19|20)\d{2}$/,
+                                  message: 'Invalid date format (mm/dd/yyyy)'
+                                }
                             })}
                         />
                         <FormErrorMessage>
