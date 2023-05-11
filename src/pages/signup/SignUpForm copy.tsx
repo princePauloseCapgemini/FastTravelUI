@@ -4,15 +4,22 @@ import {
     VStack,
     FormControl,
     Input,
-    Button, Select, SimpleGrid
+    Button, Select, 
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useForm } from 'react-hook-form'
 import { address } from './address';
+import { REGISTER_USER } from "../../graphqlOperation/mutation";
+import { useMutation } from "@apollo/client";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
+
 export default function SignupForm() {
     const [state, setState] = useState<string>('');
     const [city, setCity] = useState<any[]>([]);
-    const [district, setDistrict] = useState<any[]>([]);
+    const [date, setDate] = useState(new Date());
+
     const {
         handleSubmit,
         watch,
@@ -23,28 +30,44 @@ export default function SignupForm() {
             firstName: "",
             lastName: "",
             gender:"",
-            email: "",
+            emailAddress: "",
             password: "",
             mobileNumber: "",
-            type: "RIDER",
-            age: "",
-            lisenceNumber: "",
-            vehicleNum: "",
+            userType: "RIDER",
+            dob: "",
+            drivingLicenseNumber: "",
+            vehicleRegistrationNumber: "",
             state: "",
             city: "",
-            district: "",
-            pinCode: "",
+            addressLine: "",
+            addressLine2: "",
+            pincode: "",
         },
         shouldUnregister: true,
     })
-    const fieldOneValue = watch('type'); // Get the current value of fieldOne
-    const states = address.states;
-    let cities: any[]  = [];
-    let districts : any[]  = [];
-    function registerNewUser(payload: any): void {
-        console.log(payload)
+    const fieldOneValue = watch('userType'); // Get the current value of fieldOne
 
+
+    const [ createNewUser, { loading, error },] = useMutation(REGISTER_USER);
+
+    function registerNewUser(payload: any): void {
+        const filter  = 'state, city, addressLine, addressLine2, pincode';
+        const keys = filter.split(', ');
+        const address =  Object.assign(Object.fromEntries(keys.map(k => [k, payload[k]])), {country: "India"});
+        payload.address = address;
+       for (const k of keys) {
+          delete payload[k];
+      }
+      console.log(payload)
+    createNewUser({
+     variables: {
+        userData :  payload,
+     },
+   });
     }
+    const states = address.states;
+    let cities: any[]  = [];  
+
     // Function to handle state change
     const handleStateChange = (event: any) => {
         setState(event.target.value);
@@ -53,8 +76,8 @@ export default function SignupForm() {
         setCity(cities);
     };
 
-    // Function to handle city change
-    const handleCityChange = (event: any) => {
+      // Function to handle city change
+      const handleCityChange = (event: any) => {
         // Find the state object with the given name
         const stateObj = address.states.find(states => states.name === state);
         // Find the city object with the given name within the state object
@@ -113,18 +136,18 @@ export default function SignupForm() {
                     </FormErrorMessage>
                 </FormControl>
 
-                <FormControl isInvalid={errors.email}>
+                <FormControl isInvalid={errors.emailAddress}>
                     <Input
                         variant="customInput"
-                        id='email'
-                        placeholder='Email'
-                        {...register('email', {
+                        id='emailAddress'
+                        placeholder='Email Address'
+                        {...register('emailAddress', {
                             required: 'Please Input Email',
                             minLength: { value: 4, message: 'Minimum length should be 4' },
                         })}
                     />
                     <FormErrorMessage>
-                        {errors.email && errors.email.message}
+                        {errors.emailAddress && errors.emailAddress.message}
                     </FormErrorMessage>
                 </FormControl>
 
@@ -157,7 +180,7 @@ export default function SignupForm() {
                 </FormControl>
 
                 <FormControl>
-                    <Select {...register('city')} onChange={handleCityChange}>
+                    <Select {...register('city')}>
                         <option value="">Select City</option>
                         {state &&
                             city.map((cityObj: any) => (
@@ -169,23 +192,28 @@ export default function SignupForm() {
                 </FormControl>
 
                 <FormControl>
-                    <Select {...register('district')}>
-                        <option value="">Select District</option>
-                        {state && city && 
-                            district.map((distObj: any) => (
-                                <option key={distObj?.name} value={distObj?.name}>
-                                    {distObj?.name}
-                                </option>
-                            ))}
-                    </Select>
+                <Input
+                       variant="customInput"
+                        id='addressLine'
+                        placeholder='AddressLine'
+                        {...register('addressLine')}
+                    />
                 </FormControl>
 
                 <FormControl>
+                <Input
+                       variant="customInput"
+                        id='addressLine2'
+                        placeholder='AddressLine2'
+                        {...register('addressLine2')}
+                    />
+                </FormControl>
+                <FormControl>
                     <Input
                     variant="customInput"
-                        id='pinCode'
+                        id='pincode'
                         placeholder='Enter Pin Code'
-                        {...register('pinCode')}
+                        {...register('pincode')}
                     />
                 </FormControl>
 
@@ -199,63 +227,77 @@ export default function SignupForm() {
                 </FormControl>
 
                 <FormControl variant="customInput">
-                    <Select name="fieldOne" {...register('type', {
+                    <Select name="fieldOne" {...register('userType', {
                         required: 'Please Select User Type',
                     })}>
                         <option value='RIDER'>Rider</option>
                         <option value='PARTNER'>Partner</option>
                     </Select>
                     <FormErrorMessage>
-                        {errors.type && errors.type.message}
+                        {errors.userType && errors.userType.message}
                     </FormErrorMessage>
                 </FormControl>
 
                 {fieldOneValue === 'PARTNER' && <>
-                    <FormControl isInvalid={errors.age}>
-                        <Input
+                    <FormControl isInvalid={errors.dob}>
+                        {/* <Input
                         variant="customInput"
-                            id='age'
-                            placeholder='Age'
+                            placeholder='Date of Birth'
                             disabled={fieldOneValue !== 'PARTNER'}
                             // Disable if fieldOne is not 'option1'
-                            {...register('age', {
-                                required: 'Please Input age',
-                                minLength: { value: 2, message: 'Minimum length should be 2' },
+                            {...register('dob', {
+                                required: true,
+                                pattern: {
+                                  value: /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2[0-9]|3[01])\/(19|20)\d{2}$/,
+                                  message: 'Invalid date format (mm/dd/yyyy)'
+                                }
                             })}
-                        />
+                        /> */}
+                          <DatePicker
+                                                className="mystyle"
+                                                name="dob"
+                                                wrapperClassName="customInput"
+                                                selected={date}
+                                                dateFormat='dd/MM/yyyy'
+                                                onChange={(date) => setDate(date)}
+                                                maxDate={new Date()}
+                                                isClearable
+                                                showYEarDropdown
+                                                scrollMonthYearDropDown
+                                            />
                         <FormErrorMessage>
-                            {errors.age && errors.age.message}
+                            {errors.dob && errors.dob.message}
                         </FormErrorMessage>
                     </FormControl>
 
-                    <FormControl isInvalid={errors.vehicleNum}>
+                    <FormControl isInvalid={errors.vehicleRegistrationNumber}>
                         <Input
                         variant="customInput"
-                            id='vehicleNum'
+                            id='vehicleRegistrationNumber'
                             disabled={fieldOneValue !== 'PARTNER'} // Disable if fieldOne is not 'option1'
                             placeholder='Vechicle Registration Number'
-                            {...register('vehicleNum', {
+                            {...register('vehicleRegistrationNumber', {
                                 required: 'Please Input vehicle Registration Number',
                                 minLength: { value: 10, message: 'Minimum length should be 10' },
                             })}
                         />
                         <FormErrorMessage>
-                            {errors.lisenceNumber && errors.lisenceNumber.message}
+                            {errors.vehicleRegistrationNumber && errors.vehicleRegistrationNumber.message}
                         </FormErrorMessage>
                     </FormControl>
-                    <FormControl isInvalid={errors.lisenceNumber}>
+                    <FormControl isInvalid={errors.drivingLicenseNumber}>
                         <Input
                         variant="customInput"
-                            id='lisenceNumber'
+                            id='drivingLicenseNumber'
                             disabled={fieldOneValue !== 'PARTNER'} // Disable if fieldOne is not 'option1'
-                            placeholder='Email'
-                            {...register('lisenceNumber', {
+                            placeholder='Valid Lisence Number'
+                            {...register('drivingLicenseNumber', {
                                 required: 'Please Input lisenceNumber',
                                 minLength: { value: 10, message: 'Minimum length should be 10' },
                             })}
                         />
                         <FormErrorMessage>
-                            {errors.lisenceNumber && errors.lisenceNumber.message}
+                            {errors.drivingLicenseNumber && errors.drivingLicenseNumber.message}
                         </FormErrorMessage>
                     </FormControl>
                 </>}
