@@ -4,7 +4,7 @@ import SignUpForm from "./SignUpForm";
 export default function Signup() {
   return (
     <Container
-      maxW="container.sm"
+      maxW="container.lg"
       p="8"
       justifyContent="center"
       display="flex"
