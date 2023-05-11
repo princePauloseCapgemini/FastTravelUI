@@ -20,3 +20,12 @@ export const LOGIN_USER = gql`
     }
   }
 `;
+
+export const BOOK_TRIP = gql`
+  mutation createBooking($bookingData: BookingDataInputType) {
+    createBooking(bookingData: $bookingData) {
+      bookingId
+      createdAt
+    }
+  }
+`;

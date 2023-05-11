@@ -1,6 +1,8 @@
 import { FC } from "react";
 
-import { Box, Flex, Heading } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading } from "@chakra-ui/react";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 interface LayoutProps {
   title: string;
@@ -15,6 +17,13 @@ export const Layout: FC<LayoutProps> = ({
   children,
   bgImage,
 }) => {
+  const navigate = useNavigate();
+  const JWT = Cookies.get("jwt");
+  const handleLogout = () => {
+    Cookies.remove("jwt");
+    navigate("/");
+  };
+
   return (
     <Box
       backgroundImage={`url(${bgImage})`}
@@ -27,15 +36,23 @@ export const Layout: FC<LayoutProps> = ({
       overflowX="auto"
       bgColor="grey"
     >
-      <Flex bgColor="white" py="6" px="8" dir="row" alignItems="center">
-        <Heading size="md" color="grey">
-          {title}
-        </Heading>
-        {rightElement ? rightElement : null}
+      <Flex
+        bgColor="white"
+        py="6"
+        px="8"
+        dir="row"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Flex alignItems="center">
+          <Heading size="md" color="grey">
+            {title}
+          </Heading>
+          {rightElement ? rightElement : null}
+        </Flex>
+        {JWT && <Button onClick={() => handleLogout()}>Logout</Button>}
       </Flex>
-      <Box >
-        {children}
-      </Box>
+      <Box>{children}</Box>
     </Box>
   );
 };
