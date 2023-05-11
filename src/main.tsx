@@ -9,8 +9,9 @@ import "./index.css";
 import theme from "./theme";
 
 const client = new ApolloClient({
-  uri: "",
+  uri: "http://localhost:5000/graphql",
   cache: new InMemoryCache(),
+  fetchOptions: { mode: 'no-cors' }
 });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
