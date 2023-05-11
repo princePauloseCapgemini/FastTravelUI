@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { gql, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import {
   Button,
   Input,
@@ -11,34 +11,29 @@ import {
   HStack,
   Text,
 } from "@chakra-ui/react";
+import Cookies from "js-cookie";
 import { Formik, Form, Field } from "formik";
-
 import * as Yup from "yup";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import { LOGIN_USER } from "../../graphqlOperation/mutation";
 
 const LoginSchema = Yup.object().shape({
   emailAddress: Yup.string().required("Required"),
   password: Yup.string().required("Required"),
 });
 
-const LOGIN_USER = gql`
-  mutation signInUser($userData: userData) {
-    signInUser(userData: $userData) {
-      userId
-      jwt
-    }
-  }
-`;
-
 function LoginForm() {
   const [login] = useMutation(LOGIN_USER);
   const toast = useToast();
+  const navigate = useNavigate();
 
   const onRegister = useCallback(
     async (payload: { emailAddress: string; password: string }) => {
-      console.log(payload);
       await login({ variables: { userData: payload } })
-        .then(() => {
+        .then((response) => {
+          Cookies.set("jwt", JSON.stringify(response.data.signInUser));
+          navigate("/book-a-trip");
           toast({
             title: "Logged in successfully.",
             status: "success",
