@@ -24,8 +24,8 @@ const LoginSchema = Yup.object().shape({
 const LOGIN_USER = gql`
   mutation signInUser($userData: userData) {
     signInUser(userData: $userData) {
-      createdAt
-      firstName
+      userId
+      jwt
     }
   }
 `;

@@ -1,9 +1,10 @@
 
-type Address = {
+export default interface Address {
     country:string
     state: string;
     city : string;
-    district: string;
+    addressLine: string,
+    addressLine2: string,
     pincode:string
   }
     export default interface User  {

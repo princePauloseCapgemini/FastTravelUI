@@ -4,18 +4,15 @@ import {
     VStack,
     FormControl,
     Input,
-    Button, Select, 
+    Button, Select, SimpleGrid
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useForm } from 'react-hook-form'
 import { address } from './address';
-import { REGISTER_USER } from "../../graphqlOperation/mutation";
-import { useMutation } from "@apollo/client";
-
-
 export default function SignupForm() {
     const [state, setState] = useState<string>('');
     const [city, setCity] = useState<any[]>([]);
+    const [district, setDistrict] = useState<any[]>([]);
     const {
         handleSubmit,
         watch,
@@ -26,43 +23,28 @@ export default function SignupForm() {
             firstName: "",
             lastName: "",
             gender:"",
-            emailAddress: "",
+            email: "",
             password: "",
             mobileNumber: "",
-            userType: "RIDER",
+            type: "RIDER",
             age: "",
-            drivingLicenseNumber: "",
-            vehicleRegistrationNumber: "",
+            lisenceNumber: "",
+            vehicleNum: "",
             state: "",
             city: "",
-            addressLine: "",
-            addressLine2: "",
-            pincode: "",
+            district: "",
+            pinCode: "",
         },
         shouldUnregister: true,
     })
-    const fieldOneValue = watch('userType'); // Get the current value of fieldOne
-
-
-    const [ createNewUser, { loading, error },] = useMutation(REGISTER_USER);
-
-    function registerNewUser(payload: any): void {
-        const filter  = 'state, city, addressLine, addressLine2, pincode';
-        const keys = filter.split(', ');
-        const address =  Object.assign(Object.fromEntries(keys.map(k => [k, payload[k]])), {country: "India"});
-        payload.address = address;
-       for (let k of keys) {
-          delete payload[k];
-      }
-    createNewUser({
-     variables: {
-        userData :  payload,
-     },
-   });
-    }
+    const fieldOneValue = watch('type'); // Get the current value of fieldOne
     const states = address.states;
-    let cities: any[]  = [];  
+    let cities: any[]  = [];
+    let districts : any[]  = [];
+    function registerNewUser(payload: any): void {
+        console.log(payload)
 
+    }
     // Function to handle state change
     const handleStateChange = (event: any) => {
         setState(event.target.value);
@@ -70,6 +52,18 @@ export default function SignupForm() {
         cities = stateObj ? stateObj.cities : [];
         setCity(cities);
     };
+
+    // Function to handle city change
+    const handleCityChange = (event: any) => {
+        // Find the state object with the given name
+        const stateObj = address.states.find(states => states.name === state);
+        // Find the city object with the given name within the state object
+        const cityObject = stateObj ? stateObj.cities.find(city => city.name === event.target.value) : null;
+        // Extract the districts from the city object
+        districts = cityObject ? cityObject.districts : [];
+        setDistrict(districts)
+    };
+
 
     return (
         <Container maxW="container.lg" p="8" justifyContent="center">
@@ -119,18 +113,18 @@ export default function SignupForm() {
                     </FormErrorMessage>
                 </FormControl>
 
-                <FormControl isInvalid={errors.emailAddress}>
+                <FormControl isInvalid={errors.email}>
                     <Input
                         variant="customInput"
-                        id='emailAddress'
-                        placeholder='Email Address'
-                        {...register('emailAddress', {
+                        id='email'
+                        placeholder='Email'
+                        {...register('email', {
                             required: 'Please Input Email',
                             minLength: { value: 4, message: 'Minimum length should be 4' },
                         })}
                     />
                     <FormErrorMessage>
-                        {errors.emailAddress && errors.emailAddress.message}
+                        {errors.email && errors.email.message}
                     </FormErrorMessage>
                 </FormControl>
 
@@ -163,7 +157,7 @@ export default function SignupForm() {
                 </FormControl>
 
                 <FormControl>
-                    <Select {...register('city')}>
+                    <Select {...register('city')} onChange={handleCityChange}>
                         <option value="">Select City</option>
                         {state &&
                             city.map((cityObj: any) => (
@@ -175,28 +169,23 @@ export default function SignupForm() {
                 </FormControl>
 
                 <FormControl>
-                <Input
-                       variant="customInput"
-                        id='addressLine'
-                        placeholder='AddressLine'
-                        {...register('addressLine')}
-                    />
+                    <Select {...register('district')}>
+                        <option value="">Select District</option>
+                        {state && city && 
+                            district.map((distObj: any) => (
+                                <option key={distObj?.name} value={distObj?.name}>
+                                    {distObj?.name}
+                                </option>
+                            ))}
+                    </Select>
                 </FormControl>
 
                 <FormControl>
-                <Input
-                       variant="customInput"
-                        id='addressLine2'
-                        placeholder='AddressLine2'
-                        {...register('addressLine2')}
-                    />
-                </FormControl>
-                <FormControl>
                     <Input
                     variant="customInput"
-                        id='pincode'
+                        id='pinCode'
                         placeholder='Enter Pin Code'
-                        {...register('pincode')}
+                        {...register('pinCode')}
                     />
                 </FormControl>
 
@@ -210,14 +199,14 @@ export default function SignupForm() {
                 </FormControl>
 
                 <FormControl variant="customInput">
-                    <Select name="fieldOne" {...register('userType', {
+                    <Select name="fieldOne" {...register('type', {
                         required: 'Please Select User Type',
                     })}>
                         <option value='RIDER'>Rider</option>
                         <option value='PARTNER'>Partner</option>
                     </Select>
                     <FormErrorMessage>
-                        {errors.userType && errors.userType.message}
+                        {errors.type && errors.type.message}
                     </FormErrorMessage>
                 </FormControl>
 
@@ -239,34 +228,34 @@ export default function SignupForm() {
                         </FormErrorMessage>
                     </FormControl>
 
-                    <FormControl isInvalid={errors.vehicleRegistrationNumber}>
+                    <FormControl isInvalid={errors.vehicleNum}>
                         <Input
                         variant="customInput"
-                            id='vehicleRegistrationNumber'
+                            id='vehicleNum'
                             disabled={fieldOneValue !== 'PARTNER'} // Disable if fieldOne is not 'option1'
                             placeholder='Vechicle Registration Number'
-                            {...register('vehicleRegistrationNumber', {
+                            {...register('vehicleNum', {
                                 required: 'Please Input vehicle Registration Number',
                                 minLength: { value: 10, message: 'Minimum length should be 10' },
                             })}
                         />
                         <FormErrorMessage>
-                            {errors.vehicleRegistrationNumber && errors.vehicleRegistrationNumber.message}
+                            {errors.lisenceNumber && errors.lisenceNumber.message}
                         </FormErrorMessage>
                     </FormControl>
-                    <FormControl isInvalid={errors.drivingLicenseNumber}>
+                    <FormControl isInvalid={errors.lisenceNumber}>
                         <Input
                         variant="customInput"
-                            id='drivingLicenseNumber'
+                            id='lisenceNumber'
                             disabled={fieldOneValue !== 'PARTNER'} // Disable if fieldOne is not 'option1'
-                            placeholder='Valid Lisence Number'
-                            {...register('drivingLicenseNumber', {
+                            placeholder='Email'
+                            {...register('lisenceNumber', {
                                 required: 'Please Input lisenceNumber',
                                 minLength: { value: 10, message: 'Minimum length should be 10' },
                             })}
                         />
                         <FormErrorMessage>
-                            {errors.drivingLicenseNumber && errors.drivingLicenseNumber.message}
+                            {errors.lisenceNumber && errors.lisenceNumber.message}
                         </FormErrorMessage>
                     </FormControl>
                 </>}

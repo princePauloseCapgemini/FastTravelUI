@@ -14,13 +14,12 @@ import "./index.css";
 import theme from "./theme";
 
 const client = new ApolloClient({
-  link: new HttpLink({
-    uri: "http://localhost:5000/graphql",
-    fetchOptions: {
-      mode: "no-cors",
-    },
-  }),
+  uri: "http://localhost:5000/graphql",
   cache: new InMemoryCache(),
+  headers: {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+  },
 });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
