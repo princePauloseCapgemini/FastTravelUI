@@ -14,6 +14,11 @@ import {
   ModalOverlay,
   Spacer,
   Spinner,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Tr,
   useDisclosure,
 } from "@chakra-ui/react";
 
@@ -21,7 +26,7 @@ export default function Bookings({ isOpen, onClose, onOpen, rideDetails }) {
   //   const { isOpen = openModal, onOpen, onClose } = useDisclosure();
   console.log(rideDetails);
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
 
       <ModalContent>
@@ -37,26 +42,52 @@ export default function Bookings({ isOpen, onClose, onOpen, rideDetails }) {
         )}
         <ModalCloseButton />
         <ModalBody>
-          <Flex>
-            <Box>Travel Date: </Box>
-            <Spacer />
-            <Box>{`${new Date(rideDetails.createAt)}`}</Box>
-          </Flex>{" "}
-          <Flex>
-            <Box>Started At:</Box>
-            <Spacer />
-            <Box> {`${new Date(rideDetails.startTime)}`}</Box>
-          </Flex>{" "}
-          <Flex>
-            <Box    >Completed At:</Box>
-            <Spacer />
-            <Box> {`${new Date(rideDetails.bookingEndTime)}`}</Box>
-          </Flex>{" "}
-          <Flex>
-            <Box>Fare:</Box>
-            <Spacer />
-            <Box> {`${new Date(rideDetails.fare)}`}</Box>
-          </Flex>
+          <TableContainer>
+            <Table>
+              <Tbody>
+                <Tr>
+                  <Td>
+                    <Box>Travel Date: </Box>
+                  </Td>
+                  <Td>
+                    <Box>{`${new Date(rideDetails.createAt)}`}</Box>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <Box>Started At: </Box>
+                  </Td>
+                  <Td>
+                    <Box>{`${new Date(rideDetails.startTime)}`}</Box>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <Box>Completed At:</Box>
+                  </Td>
+                  <Td>
+                    <Box>{`${new Date(rideDetails.bookingEndTime)}`}</Box>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <Box>Fare:</Box>
+                  </Td>
+                  <Td>
+                    <Box> {`${new Date(rideDetails.fare)}`}</Box>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <Box>Rider:</Box>
+                  </Td>
+                  <Td>
+                    <Box> {`${new Date(rideDetails.partnerId)}`}</Box>
+                  </Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </TableContainer>
         </ModalBody>
 
         <ModalFooter>
