@@ -8,6 +8,7 @@ import {
   Text,
   HStack,
   useToast,
+  Select,
 } from "@chakra-ui/react";
 import { useMutation } from "@apollo/client";
 import {
@@ -20,6 +21,7 @@ import {
 import { useRef, useState } from "react";
 import { BOOK_TRIP } from "../../graphqlOperation/mutation";
 import { useIsMobile } from "../../utilities/isMobile";
+import { locations } from "./constants";
 
 const center = { lat: 48.8584, lng: 2.2945 };
 
@@ -34,44 +36,40 @@ function BookTrip() {
 
   const [map, setMap] = useState<any>(null);
   const [directionsResponse, setDirectionsResponse] = useState<any>(null);
-  const [distance, setDistance] = useState(143);
-  const [duration, setDuration] = useState(163);
-
-  const originRef = useRef<HTMLInputElement>(null);
-  const destiantionRef = useRef<HTMLInputElement>(null);
+  const [distance, setDistance] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
 
   if (!isLoaded) {
     return <SkeletonText />;
   }
 
   async function calculateRoute() {
-    if (
-      originRef?.current?.value === "" ||
-      destiantionRef?.current?.value === ""
-    ) {
+    if (origin === "" || destination === "") {
       return;
     }
-    const directionsService = new google.maps.DirectionsService();
-    const results = await directionsService.route({
-      origin: originRef?.current?.value || "",
-      destination: destiantionRef?.current?.value || "",
-      travelMode: google.maps.TravelMode.DRIVING,
-    });
-    setDirectionsResponse(results || null);
-    setDistance(results?.routes?.[0]?.legs?.[0]?.distance?.value || 0);
-    setDuration(results?.routes?.[0]?.legs?.[0]?.duration?.value || 0);
+    const randomIndex = Math.floor(Math.random() * 5);
+    const newDistance = Math.round([116, 76, 132, 88, 146][randomIndex]);
+    setDistance(newDistance);
+    setDuration(Math.round((newDistance * 80) / 100));
+    // const directionsService = new google.maps.DirectionsService();
+    // const results = await directionsService.route({
+    //   origin,
+    //   destination,
+    //   travelMode: google.maps.TravelMode.DRIVING,
+    // });
+    // setDirectionsResponse(results || null);
+    // setDistance(results?.routes?.[0]?.legs?.[0]?.distance?.value || 0);
+    // setDuration(results?.routes?.[0]?.legs?.[0]?.duration?.value || 0);
   }
 
   function clearRoute() {
     setDirectionsResponse(null);
     setDistance(0);
     setDuration(0);
-    if (originRef?.current) {
-      originRef.current.value = "";
-    }
-    if (destiantionRef?.current) {
-      destiantionRef.current.value = "";
-    }
+    setOrigin("");
+    setDestination("");
   }
 
   async function bookMeeting() {
@@ -80,8 +78,8 @@ function BookTrip() {
     endTime = new Date(endTime);
 
     const payload = {
-      origin: originRef?.current?.value,
-      destination: destiantionRef?.current?.value,
+      origin,
+      destination,
       fare: distance * 10 + duration * 2,
       riderId: "rid_2345",
       // status:"IN_PROGRESS",
@@ -96,6 +94,7 @@ function BookTrip() {
           duration: 5000,
           isClosable: true,
         });
+        clearRoute();
       })
       .catch((error) => {
         toast({
@@ -126,48 +125,54 @@ function BookTrip() {
           >
             <Box flexGrow={1} w="100%">
               {/* <Autocomplete> */}
-              <Input
-                type="text"
-                placeholder="Origin"
-                ref={originRef}
-                defaultValue="Bengaluru"
-              />
+              <Select
+                variant="customSelect"
+                placeholder="Select origin"
+                value={origin}
+                onChange={(e) => setOrigin(e.target.value)}
+              >
+                {locations
+                  .filter((item) => item?.place !== destination)
+                  .map((location) => (
+                    <option value={location.place}>{location.place}</option>
+                  ))}
+              </Select>
               {/* </Autocomplete> */}
             </Box>
             <Box flexGrow={1} w="100%">
               {/* <Autocomplete> */}
-              <Input
-                type="text"
-                placeholder="Destination"
-                ref={destiantionRef}
-                defaultValue="Mysuru"
-              />
+              <Select
+                variant="customSelect"
+                placeholder="Select Destination"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+              >
+                {locations
+                  .filter((item) => item?.place !== origin)
+                  .map((location) => (
+                    <option value={location.place}>{location.place}</option>
+                  ))}
+              </Select>
               {/* </Autocomplete> */}
             </Box>
 
             <HStack justifyContent="space-between" w="100%">
-              <Button
-                colorScheme="teal"
-                type="submit"
-                //  onClick={calculateRoute}
-              >
+              <Button colorScheme="teal" type="submit" onClick={calculateRoute}>
                 Calculate Route
               </Button>
-              <Button
-              // onClick={clearRoute}
-              >
-                Clear
-              </Button>
+              <Button onClick={clearRoute}>Clear</Button>
             </HStack>
           </VStack>
-          <VStack w="100%" alignItems="flex-start" spacing={4} mt={4}>
-            {distance && <Text>Distance: {distance} Km </Text>}
-            {duration && <Text>Duration: {duration} mins </Text>}
-            <Text>Fare: ₹{distance * 10 + duration * 2} </Text>
-            <Button onClick={bookMeeting} colorScheme="teal">
-              Book Meeting
-            </Button>
-          </VStack>
+          {distance && duration ? (
+            <VStack w="100%" alignItems="flex-start" spacing={4} mt={4}>
+              <Text>Distance: {distance} Km </Text>
+              <Text>Duration: {duration} mins </Text>
+              <Text>Fare: ₹{distance * 10 + duration * 2} </Text>
+              <Button onClick={bookMeeting} colorScheme="teal">
+                Book Meeting
+              </Button>
+            </VStack>
+          ) : null}
         </Box>
         <Box
           borderRadius="lg"
