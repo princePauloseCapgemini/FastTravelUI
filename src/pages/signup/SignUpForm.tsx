@@ -59,7 +59,7 @@ export default function SignupForm() {
     const [city, setCity] = useState<any[]>([]);
     const [date, setDate] = useState(new Date());
     const [createNewUser, { loading, error },] = useMutation(REGISTER_USER);
-
+    
     let cities: any[] = [];
     // Function to handle state change
     const handleStateChange = (event: any) => {
@@ -71,19 +71,30 @@ export default function SignupForm() {
     function onRegister(payload: { firstName: string; lastName: string; gender: string; email: string; password: string; mobileNumber: string; type: string; dob: string; drivingLicenseNumber: string; vehicleRegistrationNumber: string; state: string; city: string; addressLine: string; addressLine2: string; pincode: string; address: Address}) {
         const filter = 'state, city, addressLine, addressLine2, pincode';
         const keys = filter.split(', ');
-        const userAddress = Object.assign(Object.fromEntries(keys.map((k: string) => [k, payload[k]])),{ country: "India" });
+        const userAddress = Object.assign(Object.fromEntries(keys.map((k) => [k, payload[k]])),{ country: "India" });
+        
         payload.address = userAddress;
         for (const k of keys) {
             delete payload[k];
         }
-        console.log(payload)
         payload.dob = moment(payload.dob).format('DD/MM/YYYY');
-
-        createNewUser({
-            variables: {
-                userData: payload,
-            },
-        });
+        createNewUser({variables: {userData: payload}}).then((response) => {
+            console.log(response)
+            toast({
+              title: "User Created Successfully",
+              status: "success",
+              duration: 5000,
+              isClosable: true,
+            });
+          })
+          .catch((error) => {
+            toast({
+              title: error.message || "Something went wrong.",
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+            });
+          });
     }
     return (
         <>
@@ -119,7 +130,7 @@ export default function SignupForm() {
 
                 {({ isSubmitting, setFieldValue }) => (
                     <Form>
-
+                        {error && <span>{error.message}</span>}
                         <SimpleGrid columns={2} spacingX='40px' spacingY='20px' maxW="container.xl" p="4" justifyContent="center">
                             <Box>
                                 <Field name="firstName">

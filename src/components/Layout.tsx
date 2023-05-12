@@ -1,8 +1,8 @@
 import { FC } from "react";
 
-import { Box, Button, Flex, Heading } from "@chakra-ui/react";
+import { Box, Flex, Heading, ButtonGroup, Avatar, Stack, Menu, MenuButton, MenuItem, MenuList, Button } from "@chakra-ui/react";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface LayoutProps {
   title: string;
@@ -18,6 +18,7 @@ export const Layout: FC<LayoutProps> = ({
   bgImage,
 }) => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const JWT = Cookies.get("jwt");
   const handleLogout = () => {
     Cookies.remove("jwt");
@@ -50,7 +51,33 @@ export const Layout: FC<LayoutProps> = ({
           </Heading>
           {rightElement ? rightElement : null}
         </Flex>
-        {JWT && <Button onClick={() => handleLogout()}>Logout</Button>}
+        <ButtonGroup gap='2'>
+        {!JWT && ( function() {
+            switch (pathname) {
+              case '/login':
+                return <Button colorScheme='teal' onClick={() => navigate('/signup')}>Sign Up</Button>
+              case '/signup':
+                return <Button colorScheme='teal' onClick={() => navigate('/login')}>Login</Button>
+            }
+          })()}
+  
+          {JWT &&
+          <>
+              <Stack direction='row' style={{zIndex:30}}>
+                <Menu>
+                  <MenuButton>
+                    <Avatar src='https://bit.ly/broken-link' />
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem onClick={()=>navigate("/profile")}>Profile</MenuItem>
+                    <hr/>
+                    <MenuItem onClick={() => handleLogout()}>Logout</MenuItem>
+                  </MenuList>
+                </Menu>
+              </Stack>
+            </>}
+        </ButtonGroup>
+
       </Flex>
       <Box>{children}</Box>
     </Box>
