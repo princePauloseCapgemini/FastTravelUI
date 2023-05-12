@@ -1,280 +1,474 @@
 import {
-    Container, FormErrorMessage,
-    FormLabel,
     VStack,
     FormControl,
+    Button,
+    Select,
+    SimpleGrid,
+    Box,
     Input,
-    Button, Select, 
+    FormErrorMessage,
+    useToast,
+    HStack,
+    Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { useForm } from 'react-hook-form'
+import { useState, } from "react";
 import { address } from './address';
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import { Link } from "react-router-dom";
+import DatePicker from 'react-datepicker';
 import { REGISTER_USER } from "../../graphqlOperation/mutation";
 import { useMutation } from "@apollo/client";
+import 'react-datepicker/dist/react-datepicker.css';
+import Address from "../../types/User";
+import moment from "moment";
 
+const signUpSchema = Yup.object().shape({
+    firstName: Yup.string().required("Enter FirstName"),
+    lastName: Yup.string().required("Enter LastName"),
+    gender: Yup.string().required("Select Gender"),
+    emailAddress: Yup.string().required("Enter Email"),
+    password: Yup.string().required("Enter Password").min(8, 'Must be exactly 8 digits'),
+    mobileNumber: Yup.string().notRequired(),
+    userType: Yup.string().required(),
+    dob: Yup.string().when("userType", {
+        is: (userType: string) => userType === 'PARTNER',
+        then: () => Yup.string()
+        .required("Required")
+    }),
+    drivingLicenseNumber: Yup.string().when("userType", {
+        is: (userType: string) => userType === 'PARTNER',
+        then: () => Yup.string()
+            .required("Enter valid Lisence Number").min(5, 'Must be exactly 5 digits')
+    }),
+    vehicleRegistrationNumber: Yup.string().when("userType", {
+        is: (userType: string) => userType === 'PARTNER',
+        then: () => Yup.string()
+            .required("Enter valid Vehicle Registration Number").min(5, 'Must be exactly 5 digits')
+    }),
+    state: Yup.string().notRequired(),
+    city: Yup.string().notRequired(),
+    addressLine: Yup.string().notRequired(),
+    addressLine2: Yup.string().notRequired(),
+    pinCode: Yup.string().notRequired(),
+});
 
 export default function SignupForm() {
-    const [state, setState] = useState<string>('');
-    const [city, setCity] = useState<any[]>([]);
-    const {
-        handleSubmit,
-        watch,
-        register,
-        formState: { errors, isSubmitting },
-    } = useForm({
-        defaultValues: {
-            firstName: "",
-            lastName: "",
-            gender:"",
-            emailAddress: "",
-            password: "",
-            mobileNumber: "",
-            userType: "RIDER",
-            age: "",
-            drivingLicenseNumber: "",
-            vehicleRegistrationNumber: "",
-            state: "",
-            city: "",
-            addressLine: "",
-            addressLine2: "",
-            pincode: "",
-        },
-        shouldUnregister: true,
-    })
-    const fieldOneValue = watch('userType'); // Get the current value of fieldOne
-
-
-    const [ createNewUser, { loading, error },] = useMutation(REGISTER_USER);
-
-    function registerNewUser(payload: any): void {
-        const filter  = 'state, city, addressLine, addressLine2, pincode';
-        const keys = filter.split(', ');
-        const address =  Object.assign(Object.fromEntries(keys.map(k => [k, payload[k]])), {country: "India"});
-        payload.address = address;
-       for (let k of keys) {
-          delete payload[k];
-      }
-    createNewUser({
-     variables: {
-        userData :  payload,
-     },
-   });
-    }
+    const toast = useToast();
     const states = address.states;
-    let cities: any[]  = [];  
+    const [city, setCity] = useState<any[]>([]);
+    const [date, setDate] = useState(new Date());
+    const [createNewUser, { loading, error },] = useMutation(REGISTER_USER);
 
+    let cities: any[] = [];
     // Function to handle state change
     const handleStateChange = (event: any) => {
-        setState(event.target.value);
         const stateObj = address.states.find(state => state.name === event.target.value);
         cities = stateObj ? stateObj.cities : [];
         setCity(cities);
     };
 
+    function onRegister(payload: { firstName: string; lastName: string; gender: string; email: string; password: string; mobileNumber: string; type: string; dob: string; drivingLicenseNumber: string; vehicleRegistrationNumber: string; state: string; city: string; addressLine: string; addressLine2: string; pincode: string; address: Address}) {
+        const filter = 'state, city, addressLine, addressLine2, pincode';
+        const keys = filter.split(', ');
+        const userAddress = Object.assign(Object.fromEntries(keys.map((k: string) => [k, payload[k]])),{ country: "India" });
+        payload.address = userAddress;
+        for (const k of keys) {
+            delete payload[k];
+        }
+        console.log(payload)
+        payload.dob = moment(payload.dob).format('DD/MM/YYYY');
+
+        createNewUser({
+            variables: {
+                userData: payload,
+            },
+        });
+    }
     return (
-        <Container maxW="container.lg" p="8" justifyContent="center">
-            <form noValidate onSubmit={handleSubmit(registerNewUser)}>
-            <VStack alignItems="flex-start" spacing="4">
-                <FormControl isInvalid={errors.firstName}>
-                    <Input
-                    variant="customInput"
-                        id='name'
-                        placeholder='First Name'
-                        {...register('firstName', {
-                            required: 'Please Input firstName',
-                            minLength: { value: 4, message: 'Minimum length should be 4' },
-                        })}
-                    />
-                    <FormErrorMessage>
-                        {errors.firstName && errors.firstName.message}
-                    </FormErrorMessage>
-                </FormControl>
+        <>
+            <Formik
+                initialValues={{
+                    firstName: "",
+                    lastName: "",
+                    gender: "",
+                    emailAddress: "",
+                    password: "",
+                    mobileNumber: "",
+                    userType: "RIDER",
+                    dob: new Date(),
+                    drivingLicenseNumber: "",
+                    vehicleRegistrationNumber: "",
+                    state: "",
+                    city: "",
+                    addressLine: "",
+                    addressLine2: "",
+                    pincode: "",
+                }}
+                validationSchema={signUpSchema}
+                onSubmit={async (values, { setSubmitting, resetForm }) => {
+                await onRegister(values)
+                .then(() => {
+            setSubmitting(false);
+            resetForm();
+          })
+          .catch(() => {
+            setSubmitting(false);
+          });
+      }}>
+
+                {({ isSubmitting, setFieldValue }) => (
+                    <Form>
+
+                        <SimpleGrid columns={2} spacingX='40px' spacingY='20px' maxW="container.xl" p="4" justifyContent="center">
+                            <Box>
+                                <Field name="firstName">
+                                    {({ field, form }: any) => (
+                                        <FormControl
+                                            isInvalid={
+                                                form.errors.firstName && form.touched.firstName
+                                            }
+                                        >
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="firstName-input"
+                                                {...field}
+                                                placeholder="First Name"
+                                                type="text"
+                                            />
+                                            <FormErrorMessage>
+                                                {form.errors.firstName}
+                                            </FormErrorMessage>
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="lastName">
+                                    {({ field, form }: any) => (
+                                        <FormControl
+                                            isInvalid={
+                                                form.errors.lastName && form.touched.lastName
+                                            }
+                                        >
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="lastName-input"
+                                                {...field}
+                                                placeholder="Last Name"
+                                                type="text"
+                                            />
+                                            <FormErrorMessage>
+                                                {form.errors.lastName}
+                                            </FormErrorMessage>
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="emailAddress">
+                                    {({ field, form }: any) => (
+                                        <FormControl
+                                            isInvalid={
+                                                form.errors.emailAddress && form.touched.emailAddress
+                                            }
+                                        >
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="email-input"
+                                                {...field}
+                                                placeholder="Email Address"
+                                                type="email"
+                                            />
+                                            <FormErrorMessage>
+                                                {form.errors.emailAddress}
+                                            </FormErrorMessage>
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="password">
+                                    {({ field, form }: any) => (
+                                        <FormControl
+                                            isInvalid={
+                                                form.errors.password && form.touched.password
+                                            }
+                                        >
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="password-input"
+                                                {...field}
+                                                placeholder="Password"
+                                                type="password"
+                                            />
+                                            <FormErrorMessage>
+                                                {form.errors.password}
+                                            </FormErrorMessage>
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="gender">
+                                    {({ field, form }: any) => (
+                                        <FormControl
+                                            isInvalid={
+                                                form.errors.gender && form.touched.gender
+                                            }
+                                        >
+                                            <Select
+                                                variant="customSelect"
+                                                data-testid="gender-input"
+                                                {...field}
+                                                placeholder="Select Gender"
+                                                type="gender"
+                                            >
+                                                <option value='M'>Male</option>
+                                                <option value='F'>Female</option>
+                                                <option value='O'>Others</option>
+                                            </Select>
+                                            <FormErrorMessage>
+                                                {form.errors.gender}
+                                            </FormErrorMessage>
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="userType">
+                                    {({ field, form }: any) => (
+                                        <FormControl
+                                            isInvalid={
+                                                form.errors.userType && form.touched.userType
+                                            }
+                                        >
+                                            <Select
+                                                variant="customSelect"
+                                                data-testid="gender-input"
+                                                {...field}
+                                                placeholder="Select User Type"
+                                            >
+                                                <option value='RIDER'>Rider</option>
+                                                <option value='PARTNER'>Partner</option>
+                                            </Select>
+                                            <FormErrorMessage>
+                                                {form.errors.gender}
+                                            </FormErrorMessage>
+                                        </FormControl>
+                                    )}
+                                </Field>
+
+                            </Box>
+                            <Box>
+                                <Field name="state">
+                                    {({ field, form }: any) => (
+                                        <FormControl>
+                                            <Select
+                                                variant="customSelect"
+                                                data-testid="state-selectBox"
+                                                {...field}
+                                                onChange={(e) => {handleStateChange(e) 
+                                                                  setFieldValue('state',e.target.value)}}
+                                                placeholder="Select State"
+                                            >
+                                                {states.map((stateObj) => (
+                                                    <option key={stateObj.name} value={stateObj.name}>
+                                                        {stateObj.name}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        
+                                    )}
+                                </Field>
+                            </Box>
 
 
-                <FormControl isInvalid={errors.lastName}>
-                    <Input
-                        id='lastname'
-                        variant="customInput"
-                        placeholder='Last Name'
-                        {...register('lastName', {
-                            required: 'Please Input lastName',
-                            minLength: { value: 4, message: 'Minimum length should be 4' },
-                        })}
-                    />
-                    <FormErrorMessage>
-                        {errors.lastName && errors.lastName.message}
-                    </FormErrorMessage>
-                </FormControl>
+                            <Box>
+                                <Field name="city">
+                                    {({ field, form }: any) => (
+                                        <FormControl>
+                                            <Select
+                                                variant="customSelect"
+                                                data-testid="city-selectBox"
+                                                {...field}
+                                                placeholder="Select City">
+                                                {city.map((cityObj: any) => (
+                                                    <option key={cityObj?.name} value={cityObj?.name}>
+                                                        {cityObj?.name}
+                                                    </option>
+                                                ))}
 
-                <FormControl isInvalid={errors.gender} variant="customInput">
-                    <Select {...register('gender', {
-                        required: 'Please Select Gender',
-                    })}>
-                        <option value='M'>Male</option>
-                        <option value='F'>Female</option>
-                        <option value='O'>Others</option>
-                    </Select>
-                    <FormErrorMessage>
-                        {errors.gender && errors.gender.message}
-                    </FormErrorMessage>
-                </FormControl>
+                                            </Select>
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
 
-                <FormControl isInvalid={errors.emailAddress}>
-                    <Input
-                        variant="customInput"
-                        id='emailAddress'
-                        placeholder='Email Address'
-                        {...register('emailAddress', {
-                            required: 'Please Input Email',
-                            minLength: { value: 4, message: 'Minimum length should be 4' },
-                        })}
-                    />
-                    <FormErrorMessage>
-                        {errors.emailAddress && errors.emailAddress.message}
-                    </FormErrorMessage>
-                </FormControl>
+                            <Box>
+                                <Field name="addressLine">
+                                    {({ field, form }: any) => (
+                                        <FormControl>
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="addressLine-input"
+                                                {...field}
+                                                placeholder="AddressLine"
+                                            />
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="addressLine2">
+                                    {({ field, form }: any) => (
+                                        <FormControl>
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="addressLine2-input"
+                                                {...field}
+                                                placeholder="AddressLine2"
+                                            />
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="pincode">
+                                    {({ field, form }: any) => (
+                                        <FormControl>
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="pincode-input"
+                                                {...field}
+                                                placeholder="Pin Code"
+                                            />
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="mobileNumber">
+                                    {({ field, form }: any) => (
+                                        <FormControl
+                                            isInvalid={
+                                                form.errors.mobileNumber && form.touched.mobileNumber
+                                            }
+                                        >
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="mobileNumber-input"
+                                                {...field}
+                                                placeholder="Mobile Number"
+                                            />
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="dob">
+                                    {({ field, form }: any) => (
+                                        <FormControl>
 
-                <FormControl isInvalid={errors.password}>
-                    <Input
-                       variant="customInput"
-                        type="password"
-                        id='password'
-                        placeholder='Password'
-                        {...register('password', {
-                            required: 'Please Input Password',
-                            minLength: { value: 8, message: 'Minimum length should be 8' },
-                        })}
-                    />
-                    <FormErrorMessage>
-                        {errors.password && errors.password.message}
-                    </FormErrorMessage>
-                </FormControl>
+                                            <DatePicker
+                                                className="mystyle"
+                                                name="dob"
+                                                wrapperClassName="customInput"
+                                                selected={date}
+                                                onChange={(date) => {setDate(date)
+                                                     setFieldValue('dob',(date || new Date()))}}
+                                                maxDate={new Date()}
+                                                isClearable
+                                            />
 
+                                            <FormErrorMessage>
+                                                {form.errors.pinCode}
+                                            </FormErrorMessage>
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="vehicleRegistrationNumber">
+                                    {({ field, form }: any) => (
+                                        <FormControl
+                                            isInvalid={
+                                                form.errors.vehicleRegistrationNumber && form.touched.vehicleRegistrationNumber
+                                            }
+                                        >
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="vehicleRegistrationNumber-input"
+                                                {...field}
+                                                placeholder="Vechicle Registration Number"
+                                                type="text"
+                                            />
+                                            <FormErrorMessage>
+                                                {form.errors.vehicleRegistrationNumber}
+                                            </FormErrorMessage>
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                            <Box>
+                                <Field name="drivingLicenseNumber">
+                                    {({ field, form }: any) => (
+                                        <FormControl
+                                            isInvalid={
+                                                form.errors.drivingLicenseNumber && form.touched.drivingLicenseNumber
+                                            }
+                                        >
+                                            <Input
+                                                variant="customInput"
+                                                data-testid="drivingLicenseNumber-input"
+                                                {...field}
+                                                placeholder="Valid Lisence Number"
+                                                type="text"
+                                            />
+                                            <FormErrorMessage>
+                                                {form.errors.drivingLicenseNumber}
+                                            </FormErrorMessage>
+                                        </FormControl>
+                                    )}
+                                </Field>
+                            </Box>
+                        </SimpleGrid>
 
-                <FormControl>
-                    <Select {...register('state')} onChange={handleStateChange}>
-                        <option value="">Select State</option>
-                        {states.map((stateObj) => (
-                            <option key={stateObj.name} value={stateObj.name}>
-                                {stateObj.name}
-                            </option>
-                        ))}
-                    </Select>
-                </FormControl>
+                        <HStack justifyContent="space-between" w="100%">
+                            <VStack alignItems="flex-start" spacing="0">
+                               
+                                <Link
+                                    to="/login"
+                                    style={{ color: "#666", textDecoration: "underline" }}
+                                > 
+                                <Text fontSize="sm" fontWeight="400" color="grey">
+                                    Already Had account? Login
+                                </Text>
 
-                <FormControl>
-                    <Select {...register('city')}>
-                        <option value="">Select City</option>
-                        {state &&
-                            city.map((cityObj: any) => (
-                                <option key={cityObj?.name} value={cityObj?.name}>
-                                    {cityObj?.name}
-                                </option>
-                            ))}
-                    </Select>
-                </FormControl>
+                                </Link>
+                            </VStack>
+                            <Button
+                                isLoading={isSubmitting}
+                                mt={4}
+                                colorScheme="teal"
+                                type="submit"
+                                bgColor="black"
+                                fontWeight="400"
+                                _hover={{
+                                    bgColor: "primary",
+                                }}
+                            >
+                                Sign Up
+                            </Button>
+                        </HStack>
+                    </Form>
 
-                <FormControl>
-                <Input
-                       variant="customInput"
-                        id='addressLine'
-                        placeholder='AddressLine'
-                        {...register('addressLine')}
-                    />
-                </FormControl>
+                )}
+            </Formik>
 
-                <FormControl>
-                <Input
-                       variant="customInput"
-                        id='addressLine2'
-                        placeholder='AddressLine2'
-                        {...register('addressLine2')}
-                    />
-                </FormControl>
-                <FormControl>
-                    <Input
-                    variant="customInput"
-                        id='pincode'
-                        placeholder='Enter Pin Code'
-                        {...register('pincode')}
-                    />
-                </FormControl>
-
-                <FormControl>
-                    <Input
-                    variant="customInput"
-                        id='mobileNumber'
-                        placeholder='Mobile'
-                        {...register('mobileNumber')}
-                    />
-                </FormControl>
-
-                <FormControl variant="customInput">
-                    <Select name="fieldOne" {...register('userType', {
-                        required: 'Please Select User Type',
-                    })}>
-                        <option value='RIDER'>Rider</option>
-                        <option value='PARTNER'>Partner</option>
-                    </Select>
-                    <FormErrorMessage>
-                        {errors.userType && errors.userType.message}
-                    </FormErrorMessage>
-                </FormControl>
-
-                {fieldOneValue === 'PARTNER' && <>
-                    <FormControl isInvalid={errors.age}>
-                        <Input
-                        variant="customInput"
-                            id='age'
-                            placeholder='Age'
-                            disabled={fieldOneValue !== 'PARTNER'}
-                            // Disable if fieldOne is not 'option1'
-                            {...register('age', {
-                                required: 'Please Input age',
-                                minLength: { value: 2, message: 'Minimum length should be 2' },
-                            })}
-                        />
-                        <FormErrorMessage>
-                            {errors.age && errors.age.message}
-                        </FormErrorMessage>
-                    </FormControl>
-
-                    <FormControl isInvalid={errors.vehicleRegistrationNumber}>
-                        <Input
-                        variant="customInput"
-                            id='vehicleRegistrationNumber'
-                            disabled={fieldOneValue !== 'PARTNER'} // Disable if fieldOne is not 'option1'
-                            placeholder='Vechicle Registration Number'
-                            {...register('vehicleRegistrationNumber', {
-                                required: 'Please Input vehicle Registration Number',
-                                minLength: { value: 10, message: 'Minimum length should be 10' },
-                            })}
-                        />
-                        <FormErrorMessage>
-                            {errors.vehicleRegistrationNumber && errors.vehicleRegistrationNumber.message}
-                        </FormErrorMessage>
-                    </FormControl>
-                    <FormControl isInvalid={errors.drivingLicenseNumber}>
-                        <Input
-                        variant="customInput"
-                            id='drivingLicenseNumber'
-                            disabled={fieldOneValue !== 'PARTNER'} // Disable if fieldOne is not 'option1'
-                            placeholder='Valid Lisence Number'
-                            {...register('drivingLicenseNumber', {
-                                required: 'Please Input lisenceNumber',
-                                minLength: { value: 10, message: 'Minimum length should be 10' },
-                            })}
-                        />
-                        <FormErrorMessage>
-                            {errors.drivingLicenseNumber && errors.drivingLicenseNumber.message}
-                        </FormErrorMessage>
-                    </FormControl>
-                </>}
-                </VStack>
-                <Button mt={4} colorScheme='teal' isLoading={isSubmitting} type='submit'>
-                    Submit
-                </Button>
-            </form>
-        </Container>
+        </>
     );
 }
+
+

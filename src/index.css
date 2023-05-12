@@ -10,3 +10,15 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
+.react-datepicker__close-icon{
+  display: none;
+}
+
+.mystyle{
+  background-color: #eee;
+  padding: 15px 5px  0px  10px;
+  border: "none";
+  width: 100%;
+  border-radius: 5px;
+  height: 50px;
+}
