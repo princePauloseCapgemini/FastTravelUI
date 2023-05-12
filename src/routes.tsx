@@ -1,5 +1,12 @@
 import { Button, HStack } from "@chakra-ui/react";
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+  Navigate,
+} from "react-router-dom";
+import Cookies from "js-cookie";
 
 import EntryProvider from "./components/EntryProvider";
 import { Layout } from "./components/Layout";
@@ -16,8 +23,11 @@ interface RouteProps {
 function Router() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const JWT = Cookies.get("jwt");
 
   const UnRestrictedRoute = ({ element }: RouteProps) => {
+    if (JWT) return <Navigate to="/book-a-trip" replace={true} />;
+
     return (
       <Layout title="Fast Travel" bgImage="/cab.jpg">
         {element}
@@ -26,6 +36,8 @@ function Router() {
   };
 
   const RestrictedRoute = ({ element }: RouteProps) => {
+    if (!JWT) return <Navigate to="/login" replace={true} />;
+
     return (
       <Layout
         title="Fast Travel"
