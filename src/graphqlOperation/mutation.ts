@@ -17,6 +17,8 @@ export const LOGIN_USER = gql`
     signInUser(userData: $userData) {
       userId
       jwt
+      firstName
+      emailAddress
     }
   }
 `;

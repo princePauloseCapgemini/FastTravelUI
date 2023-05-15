@@ -10,6 +10,7 @@ import {
   VStack,
   HStack,
   Text,
+  Select,
 } from "@chakra-ui/react";
 import Cookies from "js-cookie";
 import { Formik, Form, Field } from "formik";
@@ -21,6 +22,7 @@ import { LOGIN_USER } from "../../graphqlOperation/mutation";
 const LoginSchema = Yup.object().shape({
   emailAddress: Yup.string().required("Required"),
   password: Yup.string().required("Required"),
+  userType: Yup.string().required("Required"),
 });
 
 function LoginForm() {
@@ -30,7 +32,9 @@ function LoginForm() {
 
   const onRegister = useCallback(
     async (payload: { emailAddress: string; password: string }) => {
-      await login({ variables: { userData: payload } })
+      await login({
+        variables: { userData: payload },
+      })
         .then((response) => {
           Cookies.set("jwt", JSON.stringify(response.data.signInUser));
           navigate("/book-a-trip");
@@ -58,6 +62,7 @@ function LoginForm() {
       initialValues={{
         emailAddress: "",
         password: "",
+        userType: "RIDER",
       }}
       validationSchema={LoginSchema}
       onSubmit={async (values, { setSubmitting, resetForm }) => {
@@ -74,6 +79,24 @@ function LoginForm() {
       {({ isSubmitting }) => (
         <Form>
           <VStack alignItems="flex-start" spacing="4">
+            <Field name="userType">
+              {({ field, form }: any) => (
+                <FormControl
+                  isInvalid={form.errors.userType && form.touched.userType}
+                >
+                  <Select
+                    variant="customSelect"
+                    data-testid="gender-input"
+                    {...field}
+                    placeholder="Select User Type"
+                  >
+                    <option value="RIDER">Rider</option>
+                    <option value="PARTNER">Partner</option>
+                  </Select>
+                  <FormErrorMessage>{form.errors.userType}</FormErrorMessage>
+                </FormControl>
+              )}
+            </Field>
             <Field name="emailAddress">
               {({ field, form }: any) => (
                 <FormControl

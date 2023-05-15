@@ -1,6 +1,19 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 
-import { Box, Flex, Heading, ButtonGroup, Avatar, Stack, Menu, MenuButton, MenuItem, MenuList, Button } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Heading,
+  ButtonGroup,
+  Avatar,
+  Stack,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Button,
+  useToast,
+} from "@chakra-ui/react";
 import Cookies from "js-cookie";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -20,7 +33,12 @@ export const Layout: FC<LayoutProps> = ({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const JWT = Cookies.get("jwt");
-  const handleLogout = () => {
+
+  const userInfo = useMemo(() => {
+    return typeof JWT === "string" ? JSON.parse(JWT) : {};
+  }, [JWT]);
+
+  const handleLogout = async () => {
     Cookies.remove("jwt");
     navigate("/");
   };
@@ -46,38 +64,60 @@ export const Layout: FC<LayoutProps> = ({
         justifyContent="space-between"
       >
         <Flex alignItems="center">
-          <Heading size="md" color="grey">
+          <Heading
+            size="md"
+            color="grey"
+            cursor="pointer"
+            onClick={() => navigate(JWT ? "/book-a-trip" : "/login")}
+          >
             {title}
           </Heading>
           {rightElement ? rightElement : null}
         </Flex>
-        <ButtonGroup gap='2'>
-        {!JWT && ( function() {
-            switch (pathname) {
-              case '/login':
-                return <Button colorScheme='teal' onClick={() => navigate('/signup')}>Sign Up</Button>
-              case '/signup':
-                return <Button colorScheme='teal' onClick={() => navigate('/login')}>Login</Button>
-            }
-          })()}
-  
-          {JWT &&
-          <>
-              <Stack direction='row' style={{zIndex:30}}>
+        <ButtonGroup gap="2">
+          {!JWT &&
+            (function () {
+              switch (pathname) {
+                case "/login":
+                  return (
+                    <Button
+                      colorScheme="teal"
+                      onClick={() => navigate("/signup")}
+                    >
+                      Sign Up
+                    </Button>
+                  );
+                case "/signup":
+                  return (
+                    <Button
+                      colorScheme="teal"
+                      onClick={() => navigate("/login")}
+                    >
+                      Login
+                    </Button>
+                  );
+              }
+            })()}
+
+          {JWT && (
+            <>
+              <Stack direction="row" style={{ zIndex: 30 }}>
                 <Menu>
                   <MenuButton>
-                    <Avatar src='https://bit.ly/broken-link' />
+                    <Avatar size="sm" src="https://bit.ly/broken-link" />
                   </MenuButton>
                   <MenuList>
-                    <MenuItem onClick={()=>navigate("/profile")}>Profile</MenuItem>
-                    <hr/>
+                    <MenuItem fontWeight="semibold" cursor="text">
+                      {userInfo?.firstName || ""}
+                    </MenuItem>
+                    <hr />
                     <MenuItem onClick={() => handleLogout()}>Logout</MenuItem>
                   </MenuList>
                 </Menu>
               </Stack>
-            </>}
+            </>
+          )}
         </ButtonGroup>
-
       </Flex>
       <Box>{children}</Box>
     </Box>
