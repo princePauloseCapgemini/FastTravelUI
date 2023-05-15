@@ -34,7 +34,7 @@ const signUpSchema = Yup.object().shape({
     dob: Yup.string().when("userType", {
         is: (userType: string) => userType === 'PARTNER',
         then: () => Yup.string()
-        .required("Required")
+        .required("Select the Date")
     }),
     drivingLicenseNumber: Yup.string().when("userType", {
         is: (userType: string) => userType === 'PARTNER',
@@ -59,7 +59,6 @@ export default function SignupForm() {
     const [city, setCity] = useState<any[]>([]);
     const [date, setDate] = useState(new Date());
     const [createNewUser, { loading, error },] = useMutation(REGISTER_USER);
-    
     let cities: any[] = [];
     // Function to handle state change
     const handleStateChange = (event: any) => {
@@ -69,17 +68,18 @@ export default function SignupForm() {
     };
 
     function onRegister(payload: { firstName: string; lastName: string; gender: string; email: string; password: string; mobileNumber: string; type: string; dob: string; drivingLicenseNumber: string; vehicleRegistrationNumber: string; state: string; city: string; addressLine: string; addressLine2: string; pincode: string; address: Address}) {
+        const dateFormatRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+        if (!dateFormatRegex.test(payload.dob)) {
+            payload.dob = moment(payload.dob).format('DD/MM/YYYY');
+          }
         const filter = 'state, city, addressLine, addressLine2, pincode';
         const keys = filter.split(', ');
         const userAddress = Object.assign(Object.fromEntries(keys.map((k) => [k, payload[k]])),{ country: "India" });
-        
         payload.address = userAddress;
         for (const k of keys) {
             delete payload[k];
         }
-        payload.dob = moment(payload.dob).format('DD/MM/YYYY');
         createNewUser({variables: {userData: payload}}).then((response) => {
-            console.log(response)
             toast({
               title: "User Created Successfully",
               status: "success",
@@ -107,7 +107,7 @@ export default function SignupForm() {
                     password: "",
                     mobileNumber: "",
                     userType: "RIDER",
-                    dob: new Date(),
+                    dob: moment(new Date()).format('DD/MM/YYYY'),
                     drivingLicenseNumber: "",
                     vehicleRegistrationNumber: "",
                     state: "",
@@ -380,21 +380,22 @@ export default function SignupForm() {
                             <Box>
                                 <Field name="dob">
                                     {({ field, form }: any) => (
-                                        <FormControl>
-
+                                        <FormControl
+                                        isInvalid={
+                                            form.errors.dob && form.touched.dob
+                                        }>
                                             <DatePicker
                                                 className="mystyle"
+                                                placeholderText={'Date of Birth'} 
                                                 name="dob"
-                                                wrapperClassName="customInput"
                                                 selected={date}
                                                 onChange={(date) => {setDate(date)
                                                      setFieldValue('dob',(date || new Date()))}}
                                                 maxDate={new Date()}
                                                 isClearable
                                             />
-
                                             <FormErrorMessage>
-                                                {form.errors.pinCode}
+                                                {form.errors.dob}
                                             </FormErrorMessage>
                                         </FormControl>
                                     )}
