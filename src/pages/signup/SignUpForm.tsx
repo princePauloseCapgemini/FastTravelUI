@@ -107,7 +107,7 @@ export default function SignupForm() {
                     password: "",
                     mobileNumber: "",
                     userType: "RIDER",
-                    dob: moment(new Date()).format('DD/MM/YYYY'),
+                    dob: new Date(),
                     drivingLicenseNumber: "",
                     vehicleRegistrationNumber: "",
                     state: "",
