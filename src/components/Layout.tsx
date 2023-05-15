@@ -1,6 +1,5 @@
 import { FC, useMemo } from "react";
 
-import { useMutation } from "@apollo/client";
 import {
   Box,
   Flex,
@@ -17,7 +16,6 @@ import {
 } from "@chakra-ui/react";
 import Cookies from "js-cookie";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LOGOUT_USER } from "../graphqlOperation/mutation";
 
 interface LayoutProps {
   title: string;
@@ -32,9 +30,6 @@ export const Layout: FC<LayoutProps> = ({
   children,
   bgImage,
 }) => {
-  const [logout] = useMutation(LOGOUT_USER);
-
-  const toast = useToast();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const JWT = Cookies.get("jwt");
@@ -44,27 +39,8 @@ export const Layout: FC<LayoutProps> = ({
   }, [JWT]);
 
   const handleLogout = async () => {
-    await logout({
-      variables: { userData: { emailAddress: userInfo?.emailAddress } },
-    })
-      .then(() => {
-        Cookies.remove("jwt");
-        navigate("/");
-        toast({
-          title: "Logged in successfully.",
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        });
-      })
-      .catch((error) => {
-        toast({
-          title: error.message || "Something went wrong.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      });
+    Cookies.remove("jwt");
+    navigate("/");
   };
 
   return (

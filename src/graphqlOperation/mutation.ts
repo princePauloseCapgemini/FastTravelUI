@@ -23,14 +23,6 @@ export const LOGIN_USER = gql`
   }
 `;
 
-export const LOGOUT_USER = gql`
-  mutation logoutUser($userData: UserLogoutInputType) {
-    logoutUser(userData: $userData) {
-      userId
-    }
-  }
-`;
-
 export const BOOK_TRIP = gql`
   mutation createBooking($bookingData: BookingDataInputType) {
     createBooking(bookingData: $bookingData) {
