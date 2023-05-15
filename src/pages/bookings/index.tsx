@@ -12,61 +12,43 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import BookingDetails from "./BookingDetails";
+import { useQuery } from "@apollo/client";
+import {
+  GET_BOOKIN_DETAILS,
+  GET_ALL_BOOKINGS,
+} from "../../graphqlOperation/queries";
+import moment from "moment";
 
 export default function Bookings() {
   const [isBookingModal, handleBookingModal] = useState(false);
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const [rideDetails, setRideDetails] = useState({})
+  const [rideDetails, setRideDetails] = useState({});
+  const [bookingId, setBookingId] = useState("");
 
-  const bookingList = [
-    {
-      bookingId: "2345676",
-      createAt: 1683626061000,
-      origin: "Rajiv Chowk",
-      destination: "Cannaught Place",
-      fare: "200",
-      expectedEndTime: 1683626061000,
-      bookingEndTime: 1683626061000,
-      status: "INPROGRESS",
-      riderId: "4567890",
-      partnerId: "34567892",
-      startTime: 1683626061000,
-    },
-    {
-      bookingId: "2345677",
-      createAt: 1683626061000,
-      origin: "Rajiv Chowk",
-      destination: "Cannaught Place",
-      fare: "200",
-      expectedEndTime: 1683626061000,
-      bookingEndTime: 1683626061000,
-      status: "OnGoing",
-      riderId: "4567890",
-      partnerId: "34567890",
-      startTime: 1683626061000,
-    },
-    {
-      bookingId: "2345678",
-      createAt: 1683626061000,
-      origin: "Rajiv Chowk",
-      destination: "Cannaught Place",
-      fare: "200",
-      expectedEndTime: 1683626061000,
-      bookingEndTime: 1683626061000,
-      status: "OnGoing",
-      riderId: "4567890",
-      partnerId: "34567891",
-      startTime: 1683626061000,
-    },
-  ];
+  const userId = "ruid_000001";
+  // const { loading, error, data } = useQuery(GET_BOOKIN_DETAILS, { variables: { bookingId: "bid_9353" } });
+  // const { loading, error, data } = useQuery(GET_BOOKIN_DETAILS, {
+  //   variables: { bookingId },
+  // });
+  const { loading, error, data } = useQuery(GET_ALL_BOOKINGS, {
+    variables: { userId },
+  });
 
   const handleRowClick = (bookingId: String) => {
     console.log("handleRowClick", bookingId);
     //fetch Booking Details
-    const rideDetails = bookingList.find((data) => data.bookingId === bookingId);
-    setRideDetails(rideDetails);
+    // const { loading, error, data } = useQuery(GET_BOOKIN_DETAILS, {
+    //   variables: { bookingId },
+    // });
+    // console.log(data);
+    setBookingId(bookingId);
     handleBookingModal(true);
     onOpen();
+  };
+
+  const convertDate = (date) => {
+    console.log(date);
+    return new Date(date).toUTCString().split(" ").slice(0, 5).join(" ");
   };
   return (
     <Box bgColor="grey" h="100%">
@@ -83,7 +65,7 @@ export default function Bookings() {
         <TableContainer>
           <Table>
             <Tbody>
-              {bookingList?.map((bookingData) => {
+              {data?.getBookings?.map((bookingData) => {
                 return (
                   <Tr
                     role={"button"}
@@ -92,12 +74,12 @@ export default function Bookings() {
                   >
                     <Td>
                       <div>
-                        Travel Date: {`${new Date(bookingData.createAt)}`}
+                        Pick up Time: {convertDate(Number(bookingData.createdAt))}
                       </div>
                       <div>
-                        {bookingData.status === "INPROGRESS"
-                          ? "On-going Ride"
-                          : "Completed"}
+                        {bookingData.status === "COMPLETED"
+                          ? "Completed"
+                          : "On-going Ride"}
                       </div>
                     </Td>
                     <Td>
@@ -105,6 +87,14 @@ export default function Bookings() {
                     </Td>
                     <Td>
                       <div>Drop: {bookingData.destination}</div>
+                    </Td>
+                    <Td>
+                      <div>Fare: {bookingData.fare}</div>
+                    </Td>
+                    <Td>
+                      <div>
+                        Drop Time: {convertDate(Number(bookingData.completedAt))}
+                      </div>
                     </Td>
                   </Tr>
                 );
@@ -118,7 +108,7 @@ export default function Bookings() {
           isOpen={isOpen}
           onClose={onClose}
           onOpen={onOpen}
-          rideDetails={rideDetails}
+          bookingId={bookingId}
         />
       )}
     </Box>

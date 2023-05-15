@@ -1,4 +1,5 @@
 import React from "react";
+import { useQuery } from "@apollo/client";
 
 import {
   Box,
@@ -21,52 +22,83 @@ import {
   Tr,
   useDisclosure,
 } from "@chakra-ui/react";
+import {
+  GET_BOOKIN_DETAILS,
+  GET_ALL_BOOKINGS,
+} from "../../graphqlOperation/queries";
 
-export default function Bookings({ isOpen, onClose, onOpen, rideDetails }) {
+export default function Bookings({
+  isOpen,
+  onClose,
+  onOpen,
+  bookingId,
+  rideDetails = [],
+}) {
   //   const { isOpen = openModal, onOpen, onClose } = useDisclosure();
-  console.log(rideDetails);
+  console.log(bookingId);
+  const { loading, error, data } = useQuery(GET_BOOKIN_DETAILS, {
+    variables: { bookingId },
+  });
+
+  if (data) console.log(data.getBookingById);
+  const convertDate = (date) => {
+    console.log(date);
+    return new Date(date).toUTCString().split(" ").slice(0, 5).join(" ");
+  };
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
 
       <ModalContent>
         <ModalHeader>Booking Details</ModalHeader>
-        {!rideDetails && (
-          <Spinner
-            thickness="4px"
-            speed="0.65s"
-            emptyColor="gray.200"
-            color="blue.500"
-            size="xl"
-          />
+        {loading && (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+            />
+          </div>
         )}
         <ModalCloseButton />
         <ModalBody>
           <TableContainer>
             <Table>
               <Tbody>
-                <Tr>
+              <Tr>
                   <Td>
-                    <Box>Travel Date: </Box>
+                    <Box>Status: </Box>
                   </Td>
                   <Td>
-                    <Box>{`${new Date(rideDetails.createAt)}`}</Box>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>
-                    <Box>Started At: </Box>
-                  </Td>
-                  <Td>
-                    <Box>{`${new Date(rideDetails.startTime)}`}</Box>
+                    <Box>{data?.getBookingById?.status === "COMPLETED"
+                          ? "Completed"
+                          : "On-going Ride"}</Box>
                   </Td>
                 </Tr>
                 <Tr>
                   <Td>
-                    <Box>Completed At:</Box>
+                    <Box>Pick Up Time: </Box>
                   </Td>
                   <Td>
-                    <Box>{`${new Date(rideDetails.bookingEndTime)}`}</Box>
+                    <Box>{convertDate(Number(data?.getBookingById?.createdAt))}</Box>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <Box>Origin </Box>
+                  </Td>
+                  <Td>
+                    <Box>{data?.getBookingById?.origin}</Box>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <Box>Destination</Box>
+                  </Td>
+                  <Td>
+                    <Box>{data?.getBookingById?.destination}</Box>
                   </Td>
                 </Tr>
                 <Tr>
@@ -74,15 +106,23 @@ export default function Bookings({ isOpen, onClose, onOpen, rideDetails }) {
                     <Box>Fare:</Box>
                   </Td>
                   <Td>
-                    <Box> {`${new Date(rideDetails.fare)}`}</Box>
+                    <Box> {data?.getBookingById.fare}</Box>
                   </Td>
                 </Tr>
                 <Tr>
                   <Td>
-                    <Box>Rider:</Box>
+                    <Box>Vehicle Number:</Box>
                   </Td>
                   <Td>
-                    <Box> {`${new Date(rideDetails.partnerId)}`}</Box>
+                    <Box> {data?.getBookingById.vehicleId}</Box>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Td>
+                    <Box>Drop Time: </Box>
+                  </Td>
+                  <Td>
+                    <Box>{convertDate(Number(data?.getBookingById?.completedAt))}</Box>
                   </Td>
                 </Tr>
               </Tbody>
