@@ -17,6 +17,16 @@ export const LOGIN_USER = gql`
     signInUser(userData: $userData) {
       userId
       jwt
+      firstName
+      emailAddress
+    }
+  }
+`;
+
+export const LOGOUT_USER = gql`
+  mutation logoutUser($userData: UserLogoutInputType) {
+    logoutUser(userData: $userData) {
+      userId
     }
   }
 `;
