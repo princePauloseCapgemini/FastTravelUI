@@ -7,7 +7,8 @@ query getBookings($userId: ID!){
         origin,
         destination,
         fare,
-        riderId
+        riderId,
+        status
         createdAt
         completedAt
     }
