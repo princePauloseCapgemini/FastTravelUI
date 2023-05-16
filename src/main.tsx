@@ -1,44 +1,17 @@
 import React from "react";
 
-import {
-  ApolloProvider,
-  ApolloClient,
-  createHttpLink,
-  InMemoryCache,
-} from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
+import { ApolloProvider } from "@apollo/client";
 import { ChakraProvider } from "@chakra-ui/react";
 import ReactDOM from "react-dom/client";
-import Cookies from "js-cookie";
 
 import App from "./App";
 import "./index.css";
 import theme from "./theme";
-
-const httpLink = createHttpLink({
-  uri: "http://localhost:5000/graphql",
-});
-
-const authLink = setContext((_, { headers }) => {
-  const userInfo = Cookies.get("jwt") || "{}";
-  const JWT = JSON.parse(userInfo)?.jwt || undefined;
-
-  return {
-    headers: {
-      ...headers,
-      authorization: JWT ? `Bearer ${JWT}` : "",
-    },
-  };
-});
-
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
-});
+import apolloAuthClient from "./utilities/apolloAuthClient";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ApolloProvider client={client}>
+    <ApolloProvider client={apolloAuthClient()}>
       <ChakraProvider theme={theme}>
         <App />
       </ChakraProvider>
