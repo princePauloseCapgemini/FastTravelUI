@@ -29,5 +29,3 @@ export const GET_BOOKIN_DETAILS = gql`
     }
   }
 `;
-
-console.log(GET_BOOKIN_DETAILS, "_______");
