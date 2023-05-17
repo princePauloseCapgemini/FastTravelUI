@@ -72,13 +72,15 @@ export default function SignupForm() {
         if (!dateFormatRegex.test(payload.dob)) {
             payload.dob = moment(payload.dob).format('DD/MM/YYYY');
           }
-        const filter = 'state, city, addressLine, addressLine2, pincode';
-        const keys = filter.split(', ');
-        const userAddress = Object.assign(Object.fromEntries(keys.map((k) => [k, payload[k]])),{ country: "India" });
-        payload.address = userAddress;
-        for (const k of keys) {
-            delete payload[k];
+        const filter = ['state', 'city', 'addressLine', 'addressLine2', 'pincode', 'country'];
+        const userAddress: Address ={} as Address;
+        for (const key of filter) {
+            userAddress[key] = payload[key];
+            if(key === 'country') {userAddress[key] = 'India'}
+            delete payload[key];  
         }
+        payload.address = userAddress;
+        console.log(payload);
         createNewUser({variables: {userData: payload}}).then((response) => {
             toast({
               title: "User Created Successfully",
@@ -129,8 +131,8 @@ export default function SignupForm() {
       }}>
 
                 {({ isSubmitting, setFieldValue }) => (
-                    <Form>
-                        {error && <span>{error.message}</span>}
+                    <Form data-testid="form">
+                        {error && <span>Error</span>}
                         <SimpleGrid columns={2} spacingX='40px' spacingY='20px' maxW="container.xl" p="4" justifyContent="center">
                             <Box>
                                 <Field name="firstName">
