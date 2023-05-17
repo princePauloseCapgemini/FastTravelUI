@@ -9,7 +9,7 @@ import Cookies from "js-cookie";
 
 export default function apolloAuthClient() {
   const httpLink = createHttpLink({
-    uri: "http://localhost:5000/graphql",
+    uri: import.meta.env.VITE_API_ENDPOINT,
   });
 
   const authLink = setContext((_, { headers }) => {
