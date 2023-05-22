@@ -41,7 +41,7 @@ export default function Bookings({
   });
 
   if (data) console.log(data.getBookingById);
-  const convertDate = (date) => {
+  const convertDate = (date: Date) => {
     console.log(date);
     return new Date(date).toUTCString().split(" ").slice(0, 5).join(" ");
   };
@@ -67,14 +67,16 @@ export default function Bookings({
           <TableContainer>
             <Table>
               <Tbody>
-              <Tr>
+                <Tr>
                   <Td>
                     <Box>Status: </Box>
                   </Td>
                   <Td>
-                    <Box>{data?.getBookingById?.status === "COMPLETED"
-                          ? "Completed"
-                          : "On-going Ride"}</Box>
+                    <Box>
+                      {data?.getBookingById?.status === "COMPLETED"
+                        ? "Completed"
+                        : "On-going Ride"}
+                    </Box>
                   </Td>
                 </Tr>
                 <Tr>
@@ -82,7 +84,9 @@ export default function Bookings({
                     <Box>Pick Up Time: </Box>
                   </Td>
                   <Td>
-                    <Box>{convertDate(Number(data?.getBookingById?.createdAt))}</Box>
+                    <Box>
+                      {convertDate(Number(data?.getBookingById?.createdAt))}
+                    </Box>
                   </Td>
                 </Tr>
                 <Tr>
@@ -122,7 +126,9 @@ export default function Bookings({
                     <Box>Drop Time: </Box>
                   </Td>
                   <Td>
-                    <Box>{convertDate(Number(data?.getBookingById?.completedAt))}</Box>
+                    <Box>
+                      {convertDate(Number(data?.getBookingById?.completedAt))}
+                    </Box>
                   </Td>
                 </Tr>
               </Tbody>

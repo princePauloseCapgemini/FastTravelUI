@@ -46,7 +46,7 @@ export default function Bookings() {
     onOpen();
   };
 
-  const convertDate = (date) => {
+  const convertDate = (date:Date) => {
     console.log(date);
     return new Date(date).toUTCString().split(" ").slice(0, 5).join(" ");
   };
@@ -65,11 +65,11 @@ export default function Bookings() {
         <TableContainer>
           <Table>
             <Tbody>
-              {data?.getBookings?.map((bookingData) => {
+              {data?.getBookings?.map((bookingData: Array<{}>) => {
                 return (
                   <Tr
                     role={"button"}
-                    onClick={() => handleRowClick(bookingData.bookingId)}
+                    onClick={() => handleRowClick(bookingData?.bookingId)}
                     _hover={{ bg: "#ededed" }}
                   >
                     <Td>
